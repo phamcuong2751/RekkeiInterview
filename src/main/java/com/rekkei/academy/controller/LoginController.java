@@ -1,47 +1,56 @@
-package com.practicejava.demo.controllers;
+package com.rekkei.academy.controller;
 
-import com.practicejava.demo.utils.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rekkei.academy.entities.UserEntity;
+import com.rekkei.academy.payload.BaseResponse;
+import com.rekkei.academy.service.LoginService;
+import com.rekkei.academy.utils.JWTUtilsHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.net.PasswordAuthentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/api/auth")
 public class LoginController {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final JWTUtilsHelper jwtUtilsHelper;
+    private final LoginService loginService;
+    public LoginController(LoginService loginService, JWTUtilsHelper jwtUtilsHelper, AuthenticationManager authenticationManager) {
+        this.loginService = loginService;
+        this.jwtUtilsHelper = jwtUtilsHelper;
+        this.authenticationManager = authenticationManager;
+    }
 
     /**
      * @solution
      * Using AuthenticationManager and execute authenticate()
      */
-    @PostMapping("")
+    @PostMapping("/login")
     public ResponseEntity<?> login(
-            @RequestParam String username,
-            @RequestParam String password
+            @RequestBody UserEntity user
     ) {
+        String email = user.getEmail();
+        String password  = user.getPassword();
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
+                new UsernamePasswordAuthenticationToken(email, password)
         );
-
-
-        String jwt = jwtTokenProvider.generateToken(username);
+        String jwt = jwtUtilsHelper.generateToken(email);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        BaseResponse response = new BaseResponse();
+        response.setMessage("Login Success");
+        response.setData("token: " + jwt);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
-        //if authentication successful will process next step, it output error
-
-        return new ResponseEntity<>(jwt, HttpStatus.OK);
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UserEntity user){
+        Integer isSuccess = loginService.userRegistration(user);
+        BaseResponse response = new BaseResponse();
+        response.setMessage(isSuccess == 1 ? "Register successful!" : "Registration failed");
+        response.setData(isSuccess);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

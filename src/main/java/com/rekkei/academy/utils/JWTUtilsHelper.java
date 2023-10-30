@@ -4,11 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-
-public class JWTUtils {
+@Component
+public class JWTUtilsHelper {
 
     @Value("${jwt.secret.key}")
     private String JWT_SECRET;
@@ -29,7 +30,7 @@ public class JWTUtils {
     }
 
     // Get user's information from jwt
-    public String getUsernameFromJWT(String token) {
+    public String getEmailFromJWT(String token) {
         SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(JWT_SECRET));
         Claims claims = Jwts.parser()
                 .setSigningKey(key)

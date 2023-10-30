@@ -1,7 +1,7 @@
-package com.practicejava.demo.provider;
+package com.rekkei.academy.provider;
 
-import com.practicejava.demo.entity.UserEntity;
-import com.practicejava.demo.repositories.IUserRepository;
+import com.rekkei.academy.entities.UserEntity;
+import com.rekkei.academy.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Autowired
-    private IUserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     @Lazy
@@ -24,11 +24,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String username = authentication.getName();
+        String email = authentication.getName();
         String password = authentication.getCredentials().toString();
-        UserEntity userEntity = userRepository.findByEmail(username);
+        UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity != null && passwordEncoder.matches(password, userEntity.getPassword())) {
-            return new UsernamePasswordAuthenticationToken(username, userEntity.getPassword(), new ArrayList<>());
+            return new UsernamePasswordAuthenticationToken(email, userEntity.getPassword(), new ArrayList<>());
         }
         return null;
     }

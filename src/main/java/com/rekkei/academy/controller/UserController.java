@@ -1,4 +1,4 @@
-package com.practicejava.demo.controllers;
+package com.rekkei.academy.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/api/welcome")
 public class UserController {
 
     @GetMapping("")
-    public ResponseEntity<?> user() {
-        String message = "Hello user's pages";
+    public ResponseEntity<?> welcome() {
+        String message = "Welcome to my API! Start exploring and make amazing things happen.";
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

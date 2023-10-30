@@ -1,13 +1,9 @@
-package com.practicejava.demo.filter;
+package com.rekkei.academy.filter;
 
-import com.practicejava.demo.service.CustomUserDetailService;
-import com.practicejava.demo.utils.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rekkei.academy.utils.JWTUtilsHelper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,21 +17,23 @@ import java.util.ArrayList;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final JWTUtilsHelper jwtUtilsHelper;
 
-    @Autowired
-    private CustomUserDetailService customUserDetailService;
+    public JwtFilter(JWTUtilsHelper jwtUtilsHelper) {
+        this.jwtUtilsHelper = jwtUtilsHelper;
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = getJWTFromRequest(request);
-            String username = jwtTokenProvider.getUsernameFromJWT(token);
+            String email = jwtUtilsHelper.getEmailFromJWT(token);
 
-            System.out.println("doFilterInternal >>>>>>>> " + username);
+            System.out.println("doFilterInternal >>>>>>>> " + email);
 
-            if (!username.isEmpty() && jwtTokenProvider.validateToken(token)) {
+            if (!email.isEmpty() && jwtUtilsHelper.validateToken(token)) {
                 SecurityContext context = SecurityContextHolder.getContext();
                 UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken("", "", new ArrayList<>());
                 context.setAuthentication(user);
